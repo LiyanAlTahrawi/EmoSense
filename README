@@ -1,0 +1,140 @@
+EmoSense
+Multimodal Emotion-Aware AI Assistant
+EmoSense is an AI-powered project designed to recognize emotional cues from written text and spoken audio, then use those cues as additional context for more thoughtful, context-aware conversational responses.
+
+Unlike text-only sentiment analysis, EmoSense distinguishes between what a user says and how they sound. The system has separate text and audio processing paths, each specialized for its input modality.
+Project status: In development. The repository includes model-training and inference pipeline code. End-to-end frontend, backend, database, and LLM integrations should be considered ongoing work unless demonstrated by the corresponding source code.
+
+Key Features
+- Text emotion classification: Detects emotion in user-written text using transformer-based models.
+- Vocal emotion recognition: Analyzes acoustic features to estimate emotion from speech, independently of transcription.
+- Speech-to-text: Transcribes spoken audio with Whisper.
+- Six emotion categories: angry, happy, sad, fearful, disgust, and neutral.
+- Confidence-aware predictions: Audio inference provides emotion probabilities and can mark uncertain predictions.
+- Emotion-informed AI responses (integration goal): Supplies user content and predicted emotional context to an LLM so the reply can adapt appropriately without treating predictions as certain facts.
+System Architecture
+EmoSense uses two distinct input pathways.
+1. Text Input
+User Text
+    │
+    ▼
+Text Preprocessing
+    │
+    ▼
+RoBERTa / DeBERTa-v3
+    │
+    ▼
+Emotion Prediction
+    │
+    ├──────────────┐
+    ▼              ▼
+Original Text   Predicted Emotion
+    └──────┬───────┘
+           ▼
+      LLM Context
+           ▼
+    AI Response
+The text pipeline compares RoBERTa, DeBERTa-v3, and a probability-averaging ensemble. Model selection uses validation Macro-F1. The selected model provides the emotion prediction, while the original text remains the primary information for the conversational response.
+2. Voice Input
+User Audio
+    │
+    ▼
+Audio Preprocessing (FFmpeg, mono 16 kHz)
+    │
+    ├─────────────────────┐
+    ▼                     ▼
+Acoustic Emotion       Whisper ASR
+Recognition               │
+    │                     ▼
+    ▼                  Transcript
+Predicted Emotion          │
+    └──────────┬──────────┘
+               ▼
+      LLM Context / API
+               ▼
+          AI Response
+The voice pipeline evaluates Emotion2Vec+ Large and WavLM Large feature extractors, with an SVM classifier. It selects the approach with the highest validation Macro-F1. The winning acoustic model estimates emotion from vocal features, while Whisper large-v3-turbo independently converts the speech to text.
+
+This distinction is central to EmoSense: Whisper transcribes the words; the acoustic emotion model estimates the vocal tone. The transcript and tone estimate can then be passed together to the conversational AI layer.
+Models & Technologies
+Component	Technology	Purpose
+Text emotion analysis	RoBERTa (roberta-base)	Text classification
+Text emotion analysis	DeBERTa-v3 (microsoft/deberta-v3-base)	Context-sensitive text classification
+Text model selection	RoBERTa / DeBERTa / ensemble	Choose by validation Macro-F1
+Audio feature extraction	Emotion2Vec+ Large	Emotion-oriented speech representations
+Audio feature extraction	WavLM Large	Speech representations for emotion classification
+Audio classifier	Scikit-learn SVM	Classify extracted speech features
+Speech-to-text	Whisper large-v3-turbo	Multilingual transcription
+ML framework	PyTorch, Hugging Face Transformers	Training and inference
+Data processing	Python, Pandas, NumPy	Data preparation and evaluation
+Audio processing	FFmpeg, Librosa, SoundFile	Audio conversion and loading
+Prototype UI	Gradio	Local/demo voice-input interface
+Planned application integration	API backend, LLM provider, Supabase	Conversational responses and application data
+
+
+The project architecture also envisages a web interface, backend services, Supabase-backed persistence, and LLM integration. Those components are not claimed as fully deployed or verified by the two pipeline files documented here.
+
+Supported Emotions
+Internal label	Meaning
+happy	Joy / happiness
+sad	Sadness
+angry	Anger
+fearful	Fear
+disgust	Disgust
+neutral	Neutral or no clearly expressed target emotion
+
+
+Emotion predictions are estimates, not definitive statements about a person's psychological state.
+Model Development & Evaluation
+Text pipeline
+- Consolidates multiple labeled text-emotion datasets, including Hugging Face, Kaggle, and project-specific text files.
+- Standardizes labels into six categories and normalizes text.
+- Applies deduplication and checks for overlap across training, validation, and test splits.
+- Uses class-weighted loss instead of automatically discarding majority-class training examples.
+- Compares RoBERTa, DeBERTa-v3, and an ensemble using validation Macro-F1.
+- Reports accuracy, Macro-F1, and class-level evaluation, with additional negation/pragmatic diagnostics.
+Audio pipeline
+- Reads labeled training audio and separates a held-out labeled validation subset.
+- Keeps unlabeled test audio separate; accuracy cannot be computed without test labels.
+- Checks duplicate audio files and caches extracted features.
+- Compares frozen Emotion2Vec+ and WavLM representations with SVM-based classification.
+- Uses validation Macro-F1 for model selection.
+- Produces predictions with confidence information and combines voice emotion detection with Whisper transcription for inference.
+Important: The repository code describes evaluation procedures but does not establish a single verified production accuracy figure. Please consult actual experiment outputs before publishing performance claims.
+Repository Files
+EmoSense/
+├── README.md
+├── text_emotion_v3_negation.py
+└── voice_emotion_stt_pipeline.py
+- text_emotion_v3_negation.py: Text dataset preparation, training, model comparison, evaluation, and text emotion prediction.
+- voice_emotion_stt_pipeline.py: Speech preprocessing, acoustic model comparison, SVM training, Whisper transcription, and an interactive Gradio prototype.
+The supplied .py files were exported from Colab notebooks and include notebook-style commands and Google Drive paths. They are not guaranteed to run as ordinary Python scripts without adaptation.
+Getting Started (Research Pipelines)
+Prerequisites
+- Python and a suitable environment with GPU access recommended for the larger models
+- FFmpeg for audio processing
+- Access to the datasets used for model training
+- Google Colab / Google Drive for the paths and notebook-specific workflow currently used in the source files
+Suggested workflow
+1. Open the corresponding notebook in Google Colab, or convert notebook-specific commands before running the exported .py version.
+2. Update the data paths and provide the project datasets.
+3. Install the dependencies indicated in each pipeline's setup section.
+4. Run dataset preparation, training, validation, and evaluation.
+5. Save the trained models and inference artifacts.
+6. Integrate those artifacts into the application backend and connect the interface and LLM layer as needed.
+Do not commit API keys, credentials, private recordings, personal conversation data, or .env secrets to a public GitHub repository.
+Responsible AI & Privacy
+EmoSense is intended to support more context-aware interactions, not to diagnose mental-health conditions, determine intent with certainty, or replace professional support. Emotional cues can be ambiguous, culturally dependent, or affected by recording quality, sarcasm, and context. The assistant should prioritize the user's actual words and treat model predictions as uncertain supporting signals.
+
+Any deployed version should clearly disclose how recordings, transcripts, predictions, and chat history are processed, stored, protected, and deleted.
+Future Development
+- Integrate and test both emotion pipelines with a shared backend API.
+- Complete conversational LLM integration for emotion-informed responses.
+- Connect the application interface and database with appropriate authentication and privacy controls.
+- Evaluate end-to-end accuracy, latency, robustness, and multimodal disagreement cases.
+- Package and deploy the finished application.
+About the Project
+EmoSense explores multimodal emotion recognition, natural language processing, speech processing, and emotion-aware human–AI interaction.
+
+Its guiding idea is simple: understanding the words matters, and the way they are spoken may offer additional context.
+EmoSense | Multimodal Emotion-Aware AI
