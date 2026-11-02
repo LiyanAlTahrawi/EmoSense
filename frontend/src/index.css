@@ -1,0 +1,109 @@
+/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
+
+:root {
+  --canvas: 250 249 246;
+  --surface: 255 255 255;
+  --raised: 243 241 236;
+  --line: 228 225 218;
+  --ink: 38 50 56;
+  --muted: 99 107 116;
+  --accent: 71 108 91;
+  --accent-soft: 143 175 154;
+  --accent-tint: 230 239 233;
+  --on-accent: 255 255 255;
+  --lavender: 233 225 244;
+  --lavender-ink: 94 72 132;
+  --mist: 234 241 247;
+  --danger: 178 58 58;
+  --danger-tint: 251 236 235;
+  --on-danger: 255 255 255;
+  --warning: 140 92 8;
+  --warning-tint: 252 243 224;
+  --success: 47 125 86;
+  --shadow: 38 50 56;
+  color-scheme: light;
+}
+.dark {
+  --canvas: 23 28 32;
+  --surface: 32 42 44;
+  --raised: 41 52 56;
+  --line: 56 70 74;
+  --ink: 241 244 242;
+  --muted: 182 192 189;
+  --accent: 168 201 180;
+  --accent-soft: 120 160 136;
+  --accent-tint: 40 58 52;
+  --on-accent: 18 30 25;
+  --lavender: 52 45 68;
+  --lavender-ink: 205 189 230;
+  --mist: 34 47 56;
+  --danger: 239 138 128;
+  --danger-tint: 64 37 37;
+  --on-danger: 30 14 14;
+  --warning: 230 186 110;
+  --warning-tint: 60 49 30;
+  --success: 140 204 164;
+  --shadow: 0 0 0;
+  color-scheme: dark;
+}
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  @apply bg-canvas font-sans text-ink antialiased;
+}
+::selection {
+  background: rgb(var(--accent) / 0.25);
+}
+@layer components {
+  .focus-ring {
+    @apply outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-canvas;
+  }
+  .btn {
+    @apply focus-ring inline-flex h-10 select-none items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 text-sm font-medium transition-[background-color,color,border-color,transform,opacity] duration-150 ease-out active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50;
+  }
+  .btn-lg {
+    @apply h-12 px-6 text-[15px];
+  }
+  .btn-primary {
+    @apply bg-accent text-on-accent hover:bg-accent/90;
+  }
+  .btn-secondary {
+    @apply border border-line bg-surface text-ink hover:bg-raised;
+  }
+  .btn-ghost {
+    @apply text-muted hover:bg-raised hover:text-ink;
+  }
+  .btn-danger {
+    @apply bg-danger text-on-danger hover:bg-danger/90;
+  }
+  .icon-btn {
+    @apply focus-ring inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted transition-[background-color,color] duration-150 ease-out hover:bg-raised hover:text-ink disabled:pointer-events-none disabled:opacity-40;
+  }
+  .input {
+    @apply h-11 w-full rounded-xl border border-line bg-surface px-3.5 text-[15px] text-ink transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-muted/80 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25 disabled:opacity-60 aria-[invalid=true]:border-danger read-only:bg-raised/60;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-ink;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

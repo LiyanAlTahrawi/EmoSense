@@ -1,0 +1,27 @@
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Python virtual environment
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Model weights and checkpoints
+*.pt
+*.pth
+*.onnx
+*.joblib
+*.safetensors
+
+# IDE
+.vscode/
+
+# Logs
+*.log
+
+training_args.bin
